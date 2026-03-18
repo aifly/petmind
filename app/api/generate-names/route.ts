@@ -49,15 +49,15 @@ export async function POST(request: Request) {
     // 解析名字列表
     const names = generatedText
       .split('\n')
-      .filter(line => line.trim() && (line.includes('-') || line.includes('——') || line.includes('：')))
-      .map(line => {
+      .filter((line: string) => line.trim() && (line.includes('-') || line.includes('——') || line.includes('：')))
+      .map((line: string) => {
         const parts = line.split(/[-——：]/);
         return {
           name: parts[0]?.trim().replace(/^\d+\.\s*/, '') || '',
           meaning: parts[1]?.trim() || '',
         };
       })
-      .filter(item => item.name && item.name.length <= 10);
+      .filter((item: {name: string; meaning: string}) => item.name && item.name.length <= 10);
 
     return NextResponse.json({ names, raw: generatedText });
   } catch (error) {
