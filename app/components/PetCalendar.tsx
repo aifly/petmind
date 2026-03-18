@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Plus, Clock, Pill, Utensils, Scissors, Syringe, Bell, Trash2 } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Plus, Clock, Pill, Utensils, Scissors, Syringe, Bell, Trash2, LogOut, User } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 interface Reminder {
   id: string;
+  user_id: string;
   title: string;
   type: 'medicine' | 'food' | 'grooming' | 'vaccine' | 'other';
   time: string;
@@ -34,6 +35,7 @@ export default function PetCalendar({ onBack }: PetCalendarProps) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
   const [newReminder, setNewReminder] = useState({
     title: '',
     type: 'medicine' as Reminder['type'],
@@ -42,15 +44,22 @@ export default function PetCalendar({ onBack }: PetCalendarProps) {
   });
 
   useEffect(() => {
-    fetchReminders();
+    // 获取当前用户
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+      if (user) {
+        fetchReminders(user.id);
+      }
+    });
   }, []);
 
-  const fetchReminders = async () => {
+  const fetchReminders = async (userId: string) => {
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('reminders')
         .select('*')
+        .eq('user_id', userId)
         .order('date', { ascending: true })
         .order('time', { ascending: true });
 
@@ -79,7 +88,7 @@ export default function PetCalendar({ onBack }: PetCalendarProps) {
   };
 
   const addReminder = async () => {
-    if (!newReminder.title.trim() || !selectedDate) return;
+    if (!newReminder.title.trim() || !selectedDate || !user) return;
     
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(selectedDate).padStart(2, '0')}`;
     
@@ -87,6 +96,7 @@ export default function PetCalendar({ onBack }: PetCalendarProps) {
       const { data, error } = await supabase
         .from('reminders')
         .insert({
+          user_id: user.id,
           title: newReminder.title,
           type: newReminder.type,
           time: newReminder.time,
@@ -145,6 +155,10 @@ export default function PetCalendar({ onBack }: PetCalendarProps) {
                 宠物日历
               </h2>
               <p className="text-gray-400 text-sm">记录和管理宠物日程提醒</p>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <User className="w-4 h-4" />
+              <span className="max-w-[120px] truncate">{user?.email}</span>
             </div>
           </div>
         </div>

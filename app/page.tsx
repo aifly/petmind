@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { Sparkles, Brain, ArrowRight, Stethoscope, Calendar } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Sparkles, Brain, ArrowRight, Stethoscope, Calendar, LogOut, User } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 import PetNameGenerator from './components/PetNameGenerator';
 import PersonalityAnalyzer from './components/PersonalityAnalyzer';
 import HealthConsultation from './components/HealthConsultation';
 import PetCalendar from './components/PetCalendar';
+import AuthForm from './components/AuthForm';
 
 const features = [
   {
@@ -35,8 +37,48 @@ const features = [
 ];
 
 export default function Home() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [activeFeature, setActiveFeature] = useState<string | null>(null);
 
+  useEffect(() => {
+    // 检查当前用户
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+      setLoading(false);
+    });
+
+    // 监听登录状态变化
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
+  const handleLoginSuccess = () => {
+    // 登录成功后会通过 onAuthStateChange 自动更新
+  };
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-400">加载中…</div>
+      </main>
+    );
+  }
+
+  // 如果没有登录，显示登录页面
+  if (!user) {
+    return <AuthForm onLoginSuccess={handleLoginSuccess} />;
+  }
+
+  // 功能页面
   if (activeFeature === 'name') {
     return (
       <main className="min-h-screen bg-gray-100 py-8 px-4">
@@ -69,33 +111,44 @@ export default function Home() {
     );
   }
 
+  // 首页
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
+      {/* Header with User */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 pt-16 pb-12 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="text-lg font-semibold text-gray-900">
             PetMind<span className="text-gray-400">.ai</span>
-          </h1>
-          <p className="text-lg text-gray-600 max-w-lg mx-auto mb-8">
-            用人工智能关爱每一个毛孩子
-          </p>
-          <div className="flex justify-center gap-12 pt-4">
-            {[
-              { value: '10,000+', label: '宠物名字生成' },
-              { value: '5,000+', label: '性格分析报告' },
-              { value: '98%', label: '用户满意度' },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-xl font-semibold text-gray-900">{stat.value}</div>
-                <div className="text-sm text-gray-500">{stat.label}</div>
-              </div>
-            ))}
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <User className="w-4 h-4" />
+              <span className="max-w-[150px] truncate">{user.email}</span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="退出登录"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Features Section */}
+      {/* Hero */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-4xl mx-auto px-4 pt-12 pb-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            用 AI 关爱你的毛孩子
+          </h1>
+          <p className="text-lg text-gray-600 max-w-lg mx-auto">
+            智能命名 · 性格分析 · 健康咨询 · 日历管理
+          </p>
+        </div>
+      </div>
+
+      {/* Features */}
       <div className="max-w-2xl mx-auto px-4 py-12">
         <div className="text-center mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-1">选择功能</h2>
@@ -132,7 +185,6 @@ export default function Home() {
       {/* Footer */}
       <footer className="text-center py-8 text-gray-400 text-sm border-t border-gray-200 bg-white">
         <p>Made with ♥ by PetMind.ai</p>
-        <p className="mt-1">© 2025 · 用 AI 关爱每一个毛孩子</p>
       </footer>
     </main>
   );
