@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, Dog, Cat, Bird, Fish, Rabbit } from 'lucide-react';
+import { Sparkles, Dog, Cat, Bird, Fish, Rabbit, ChevronLeft } from 'lucide-react';
 
 const petTypes = [
   { id: 'cat', name: '猫咪', icon: Cat },
@@ -19,7 +19,11 @@ const styles = [
   { id: 'food', name: '食物风', desc: '美食主题' },
 ];
 
-export default function PetNameGenerator() {
+interface PetNameGeneratorProps {
+  onBack: () => void;
+}
+
+export default function PetNameGenerator({ onBack }: PetNameGeneratorProps) {
   const [petType, setPetType] = useState('cat');
   const [gender, setGender] = useState('male');
   const [style, setStyle] = useState('cute');
@@ -49,11 +53,21 @@ export default function PetNameGenerator() {
 
   return (
     <div className="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
-          🐾 宠物名字生成器
-        </h2>
-        <p className="text-gray-500">为你的毛孩子取个特别的名字</p>
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-6">
+        <button
+          onClick={onBack}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <ChevronLeft className="w-5 h-5 text-gray-600" />
+        </button>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <Sparkles className="w-6 h-6 text-blue-500" />
+            宠物名字生成器
+          </h2>
+          <p className="text-gray-500 text-sm">为你的毛孩子取个特别的名字</p>
+        </div>
       </div>
 
       {/* 宠物类型 */}
