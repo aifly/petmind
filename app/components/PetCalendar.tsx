@@ -303,7 +303,7 @@ export default function PetCalendar({ onBack }: PetCalendarProps) {
                     value={newReminder.title}
                     onChange={(e) => setNewReminder({ ...newReminder, title: e.target.value })}
                     placeholder="如：驱虫、洗澡、打疫苗…"
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-gray-500 focus:ring-2 focus:ring-gray-200 focus:outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-gray-500 focus:ring-2 focus:ring-gray-200 focus:outline-none text-gray-900 placeholder-gray-400"
                   />
                 </div>
                 
@@ -334,7 +334,7 @@ export default function PetCalendar({ onBack }: PetCalendarProps) {
                       type="time"
                       value={newReminder.time}
                       onChange={(e) => setNewReminder({ ...newReminder, time: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-gray-500 focus:ring-2 focus:ring-gray-200 focus:outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-gray-500 focus:ring-2 focus:ring-gray-200 focus:outline-none text-gray-900"
                     />
                   </div>
                   <div>
@@ -344,7 +344,7 @@ export default function PetCalendar({ onBack }: PetCalendarProps) {
                       value={newReminder.petName}
                       onChange={(e) => setNewReminder({ ...newReminder, petName: e.target.value })}
                       placeholder="可选"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-gray-500 focus:ring-2 focus:ring-gray-200 focus:outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-gray-500 focus:ring-2 focus:ring-gray-200 focus:outline-none text-gray-900 placeholder-gray-400"
                     />
                   </div>
                 </div>
