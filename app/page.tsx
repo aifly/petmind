@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, Brain, ArrowRight, Star } from 'lucide-react';
+import { Sparkles, Brain, ArrowRight, Stethoscope, Calendar } from 'lucide-react';
 import PetNameGenerator from './components/PetNameGenerator';
 import PersonalityAnalyzer from './components/PersonalityAnalyzer';
+import HealthConsultation from './components/HealthConsultation';
+import PetCalendar from './components/PetCalendar';
 
 const features = [
   {
@@ -11,18 +13,24 @@ const features = [
     name: '魔法命名',
     desc: 'AI 为你的毛孩子取个独特的名字',
     icon: Sparkles,
-    bg: 'bg-gray-900',
-    hoverBg: 'hover:bg-gray-800',
-    borderColor: 'border-gray-200',
   },
   {
     id: 'personality',
     name: '性格分析',
     desc: '深度解析你爱宠的性格特点',
     icon: Brain,
-    bg: 'bg-gray-700',
-    hoverBg: 'hover:bg-gray-600',
-    borderColor: 'border-gray-200',
+  },
+  {
+    id: 'health',
+    name: '健康咨询',
+    desc: 'AI 提供初步健康建议',
+    icon: Stethoscope,
+  },
+  {
+    id: 'calendar',
+    name: '宠物日历',
+    desc: '管理日程和健康提醒',
+    icon: Calendar,
   },
 ];
 
@@ -45,28 +53,33 @@ export default function Home() {
     );
   }
 
+  if (activeFeature === 'health') {
+    return (
+      <main className="min-h-screen bg-gray-100 py-8 px-4">
+        <HealthConsultation onBack={() => setActiveFeature(null)} />
+      </main>
+    );
+  }
+
+  if (activeFeature === 'calendar') {
+    return (
+      <main className="min-h-screen bg-gray-100 py-8 px-4">
+        <PetCalendar onBack={() => setActiveFeature(null)} />
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 pt-16 pb-12 text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-full mb-8">
-            <Star className="w-4 h-4 text-gray-600" aria-hidden="true" />
-            <span className="text-sm font-medium text-gray-600">AI 驱动的宠物助手</span>
-          </div>
-
-          {/* Title */}
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             PetMind<span className="text-gray-400">.ai</span>
           </h1>
-
-          {/* Subtitle */}
           <p className="text-lg text-gray-600 max-w-lg mx-auto mb-8">
             用人工智能关爱每一个毛孩子
           </p>
-
-          {/* Stats */}
           <div className="flex justify-center gap-12 pt-4">
             {[
               { value: '10,000+', label: '宠物名字生成' },
@@ -96,14 +109,11 @@ export default function Home() {
               <button
                 key={feature.id}
                 onClick={() => setActiveFeature(feature.id)}
-                className={`w-full p-6 rounded-2xl bg-white border ${feature.borderColor} shadow-sm hover:shadow-md transition-all text-left flex items-center gap-5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400`}
+                className="w-full p-6 rounded-2xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all text-left flex items-center gap-5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
               >
-                {/* Icon */}
-                <div className={`w-12 h-12 ${feature.bg} rounded-xl flex items-center justify-center shrink-0`}>
+                <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center shrink-0">
                   <Icon className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
-
-                {/* Text */}
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-900 mb-0.5">
                     {feature.name}
@@ -112,8 +122,6 @@ export default function Home() {
                     {feature.desc}
                   </p>
                 </div>
-
-                {/* Arrow */}
                 <ArrowRight className="w-5 h-5 text-gray-400" aria-hidden="true" />
               </button>
             );
