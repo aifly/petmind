@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, Plus, Clock, Pill, Utensils, Scissors, Syringe, Bell, Trash2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface Reminder {
   id: string;
@@ -9,7 +10,7 @@ interface Reminder {
   type: 'medicine' | 'food' | 'grooming' | 'vaccine' | 'other';
   time: string;
   date: string;
-  petName: string;
+  pet_name: string;
 }
 
 const reminderTypes = [
@@ -31,10 +32,8 @@ export default function PetCalendar({ onBack }: PetCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [reminders, setReminders] = useState<Reminder[]>([
-    { id: '1', title: '驱虫', type: 'medicine', time: '10:00', date: getTodayString(), petName: '豆豆' },
-    { id: '2', title: '洗澡', type: 'grooming', time: '14:00', date: getTodayString(), petName: '豆豆' },
-  ]);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [loading, setLoading] = useState(true);
   const [newReminder, setNewReminder] = useState({
     title: '',
     type: 'medicine' as Reminder['type'],
@@ -42,10 +41,27 @@ export default function PetCalendar({ onBack }: PetCalendarProps) {
     petName: '',
   });
 
-  function getTodayString(): string {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  }
+  useEffect(() => {
+    fetchReminders();
+  }, []);
+
+  const fetchReminders = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('reminders')
+        .select('*')
+        .order('date', { ascending: true })
+        .order('time', { ascending: true });
+
+      if (error) throw error;
+      setReminders(data || []);
+    } catch (error) {
+      console.error('Error fetching reminders:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -62,22 +78,48 @@ export default function PetCalendar({ onBack }: PetCalendarProps) {
     return reminders.filter(r => r.date === dateStr);
   };
 
-  const addReminder = () => {
+  const addReminder = async () => {
     if (!newReminder.title.trim() || !selectedDate) return;
     
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(selectedDate).padStart(2, '0')}`;
-    const reminder: Reminder = {
-      id: Date.now().toString(),
-      ...newReminder,
-      date: dateStr,
-    };
-    setReminders([...reminders, reminder]);
-    setNewReminder({ title: '', type: 'medicine', time: '09:00', petName: '' });
-    setShowAddModal(false);
+    
+    try {
+      const { data, error } = await supabase
+        .from('reminders')
+        .insert({
+          title: newReminder.title,
+          type: newReminder.type,
+          time: newReminder.time,
+          date: dateStr,
+          pet_name: newReminder.petName,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      setReminders([...reminders, data]);
+      setNewReminder({ title: '', type: 'medicine', time: '09:00', petName: '' });
+      setShowAddModal(false);
+    } catch (error) {
+      console.error('Error adding reminder:', error);
+      alert('添加失败，请重试');
+    }
   };
 
-  const deleteReminder = (id: string) => {
-    setReminders(reminders.filter(r => r.id !== id));
+  const deleteReminder = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('reminders')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      setReminders(reminders.filter(r => r.id !== id));
+    } catch (error) {
+      console.error('Error deleting reminder:', error);
+      alert('删除失败，请重试');
+    }
   };
 
   const selectedDateReminders = selectedDate
@@ -139,53 +181,60 @@ export default function PetCalendar({ onBack }: PetCalendarProps) {
             ))}
           </div>
 
-          {/* Calendar Grid */}
-          <div className="grid grid-cols-7 gap-1">
-            {Array.from({ length: firstDay }).map((_, i) => (
-              <div key={`empty-${i}`} className="h-20" />
-            ))}
-            {Array.from({ length: daysInMonth }).map((_, i) => {
-              const day = i + 1;
-              const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
-              const dayReminders = getRemindersForDate(day);
-              const isSelected = selectedDate === day;
-              
-              return (
-                <button
-                  key={day}
-                  onClick={() => setSelectedDate(day)}
-                  className={`h-20 p-1 rounded-lg text-left transition-all focus:outline-none focus:ring-2 focus:ring-gray-400 ${
-                    isSelected ? 'bg-gray-900 text-white' : 'hover:bg-gray-100'
-                  } ${isToday && !isSelected ? 'bg-gray-100' : ''}`}
-                >
-                  <span className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-gray-700'}`}>
-                    {day}
-                  </span>
-                  {dayReminders.length > 0 && (
-                    <div className="mt-1 space-y-0.5">
-                      {dayReminders.slice(0, 2).map((r) => (
-                        <div
-                          key={r.id}
-                          className={`text-xs truncate px-1 py-0.5 rounded ${isSelected ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'}`}
-                        >
-                          {r.title}
-                        </div>
-                      ))}
-                      {dayReminders.length > 2 && (
-                        <div className={`text-xs ${isSelected ? 'text-white/70' : 'text-gray-400'}`}>
-                          +{dayReminders.length - 2}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+          {/* Loading */}
+          {loading ? (
+            <div className="h-80 flex items-center justify-center">
+              <div className="text-gray-400">加载中…</div>
+            </div>
+          ) : (
+            /* Calendar Grid */
+            <div className="grid grid-cols-7 gap-1">
+              {Array.from({ length: firstDay }).map((_, i) => (
+                <div key={`empty-${i}`} className="h-20" />
+              ))}
+              {Array.from({ length: daysInMonth }).map((_, i) => {
+                const day = i + 1;
+                const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
+                const dayReminders = getRemindersForDate(day);
+                const isSelected = selectedDate === day;
+                
+                return (
+                  <button
+                    key={day}
+                    onClick={() => setSelectedDate(day)}
+                    className={`h-20 p-1 rounded-lg text-left transition-all focus:outline-none focus:ring-2 focus:ring-gray-400 ${
+                      isSelected ? 'bg-gray-900 text-white' : 'hover:bg-gray-100'
+                    } ${isToday && !isSelected ? 'bg-gray-100' : ''}`}
+                  >
+                    <span className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-gray-700'}`}>
+                      {day}
+                    </span>
+                    {dayReminders.length > 0 && (
+                      <div className="mt-1 space-y-0.5">
+                        {dayReminders.slice(0, 2).map((r) => (
+                          <div
+                            key={r.id}
+                            className={`text-xs truncate px-1 py-0.5 rounded ${isSelected ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'}`}
+                          >
+                            {r.title}
+                          </div>
+                        ))}
+                        {dayReminders.length > 2 && (
+                          <div className={`text-xs ${isSelected ? 'text-white/70' : 'text-gray-400'}`}>
+                            +{dayReminders.length - 2}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Selected Date Reminders */}
-        {selectedDate && (
+        {selectedDate && !loading && (
           <div className="border-t border-gray-200 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-900">
@@ -222,7 +271,7 @@ export default function PetCalendar({ onBack }: PetCalendarProps) {
                             <Clock className="w-3 h-3" aria-hidden="true" />
                             {reminder.time}
                           </span>
-                          {reminder.petName && <span>{reminder.petName}</span>}
+                          {reminder.pet_name && <span>{reminder.pet_name}</span>}
                         </div>
                       </div>
                       <button
