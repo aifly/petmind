@@ -95,8 +95,10 @@ export default function PetProfile({ onBack }: PetProfileProps) {
       if (error) throw error;
       setPets(data || []);
     } catch (error: any) {
-      toast.error('加载宠物列表失败');
-      console.error(error);
+      // 无数据时不报错，只在真正的网络/权限错误时提示
+      if (error?.code !== 'PGRST116') {
+        console.error(error);
+      }
     } finally {
       setLoading(false);
     }
@@ -113,7 +115,7 @@ export default function PetProfile({ onBack }: PetProfileProps) {
       if (error) throw error;
       setVaccines(data || []);
     } catch (error) {
-      toast.error('加载疫苗记录失败');
+      console.error('Error fetching vaccines:', error);
     }
   };
 
