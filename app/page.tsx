@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Brain, ArrowRight, Stethoscope, Calendar, LogOut, User, Heart, Utensils, Camera, MessageCircle, TrendingUp, ShoppingBag } from 'lucide-react';
+import { Sparkles, Brain, ArrowRight, Stethoscope, Calendar, LogOut, User, Heart, Utensils, Camera, MessageCircle, TrendingUp, ShoppingBag, PawPrint, Shield, Clipboard } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import PetNameGenerator from './components/PetNameGenerator';
 import PersonalityAnalyzer from './components/PersonalityAnalyzer';
@@ -15,67 +15,36 @@ import ProductRecommendation from './components/ProductRecommendation';
 import PhotoAnalysis from './components/PhotoAnalysis';
 import AuthForm from './components/AuthForm';
 
-const features = [
+const featureGroups = [
   {
-    id: 'profile',
-    name: '宠物档案',
-    desc: '管理宠物信息和疫苗记录',
-    icon: Heart,
-    highlight: true,
+    title: '🐾 宠物管理',
+    features: [
+      { id: 'profile', name: '宠物档案', desc: '信息记录、疫苗管理', icon: PawPrint, color: 'bg-amber-500' },
+      { id: 'growth', name: '成长记录', desc: '体重身高追踪分析', icon: TrendingUp, color: 'bg-green-500' },
+      { id: 'calendar', name: '宠物日历', desc: '日程安排、健康提醒', icon: Calendar, color: 'bg-blue-500' },
+    ]
   },
   {
-    id: 'photo',
-    name: 'AI 照片识别',
-    desc: '识别品种、健康检查、情绪解读',
-    icon: Camera,
+    title: '🤖 AI 智能服务',
+    features: [
+      { id: 'photo', name: 'AI 照片识别', desc: '品种、健康、情绪分析', icon: Camera, color: 'bg-purple-500' },
+      { id: 'name', name: '魔法命名', desc: 'AI 创意取名', icon: Sparkles, color: 'bg-pink-500' },
+      { id: 'personality', name: '性格分析', desc: '深度解析性格特点', icon: Brain, color: 'bg-indigo-500' },
+    ]
   },
   {
-    id: 'feeding',
-    name: '喂养建议',
-    desc: 'AI 定制科学喂养方案',
-    icon: Utensils,
+    title: '💊 健康医疗',
+    features: [
+      { id: 'feeding', name: '喂养建议', desc: '科学喂养方案', icon: Utensils, color: 'bg-orange-500' },
+      { id: 'health', name: '健康咨询', desc: '初步健康建议', icon: Stethoscope, color: 'bg-red-500' },
+      { id: 'consult', name: 'AI 问诊', desc: '多轮深度咨询', icon: MessageCircle, color: 'bg-cyan-500' },
+    ]
   },
   {
-    id: 'name',
-    name: '魔法命名',
-    desc: 'AI 为你的毛孩子取个独特的名字',
-    icon: Sparkles,
-  },
-  {
-    id: 'personality',
-    name: '性格分析',
-    desc: '深度解析你爱宠的性格特点',
-    icon: Brain,
-  },
-  {
-    id: 'health',
-    name: '健康咨询',
-    desc: 'AI 提供初步健康建议',
-    icon: Stethoscope,
-  },
-  {
-    id: 'consult',
-    name: 'AI 问诊',
-    desc: '多轮对话深度咨询',
-    icon: MessageCircle,
-  },
-  {
-    id: 'growth',
-    name: '成长记录',
-    desc: '体重身高追踪和AI分析',
-    icon: TrendingUp,
-  },
-  {
-    id: 'product',
-    name: '用品推荐',
-    desc: 'AI 推荐合适的产品',
-    icon: ShoppingBag,
-  },
-  {
-    id: 'calendar',
-    name: '宠物日历',
-    desc: '管理日程和健康提醒',
-    icon: Calendar,
+    title: '🛒 其他服务',
+    features: [
+      { id: 'product', name: '用品推荐', desc: 'AI 推荐合适产品', icon: ShoppingBag, color: 'bg-teal-500' },
+    ]
   },
 ];
 
@@ -195,17 +164,20 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="text-lg font-semibold text-gray-900">
-            PetMind<span className="text-gray-400">.ai</span>
+      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center">
+              <PawPrint className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-lg font-bold text-gray-900">PetMind<span className="text-amber-500">.ai</span></span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full">
               <User className="w-4 h-4" />
-              <span className="max-w-[150px] truncate">{user.email}</span>
+              <span className="max-w-[120px] truncate">{user.email}</span>
             </div>
             <button
               onClick={handleLogout}
@@ -219,61 +191,65 @@ export default function Home() {
       </div>
 
       {/* Hero */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 pt-12 pb-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-16 px-4">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-1.5 rounded-full text-sm text-amber-400 mb-6">
+            <Sparkles className="w-4 h-4" />
+            <span>AI 智能宠物管理平台</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
             用 AI 关爱你的毛孩子
           </h1>
-          <p className="text-lg text-gray-600 max-w-lg mx-auto">
-            智能命名 · 性格分析 · 健康咨询 · 日程管理
+          <p className="text-lg text-gray-300 max-w-xl mx-auto">
+            智能命名 · 性格分析 · 健康咨询 · 成长追踪
           </p>
         </div>
       </div>
 
       {/* Features */}
-      <div className="max-w-2xl mx-auto px-4 py-12">
-        <div className="text-center mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-1">选择功能</h2>
-          <p className="text-gray-500">探索 AI 为你的宠物带来的神奇体验</p>
-        </div>
-
-        <div className="space-y-4">
-          {features.map((feature) => {
-            const Icon = feature.icon;
-            return (
-              <button
-                key={feature.id}
-                onClick={() => setActiveFeature(feature.id)}
-                className={`w-full p-6 rounded-2xl border shadow-sm hover:shadow-md transition-all text-left flex items-center gap-5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 ${
-                  feature.highlight
-                    ? 'bg-gray-900 border-gray-900'
-                    : 'bg-white border-gray-200'
-                }`}
-              >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
-                  feature.highlight ? 'bg-white' : 'bg-gray-900'
-                }`}>
-                  <Icon className={`w-6 h-6 ${feature.highlight ? 'text-gray-900' : 'text-white'}`} aria-hidden="true" />
-                </div>
-                <div className="flex-1">
-                  <h3 className={`text-lg font-semibold mb-0.5 ${
-                    feature.highlight ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    {feature.name}
-                  </h3>
-                  <p className={`text-sm ${feature.highlight ? 'text-gray-300' : 'text-gray-500'}`}>
-                    {feature.desc}
-                  </p>
-                </div>
-                <ArrowRight className={`w-5 h-5 ${feature.highlight ? 'text-gray-400' : 'text-gray-400'}`} aria-hidden="true" />
-              </button>
-            );
-          })}
-        </div>
+      <div className="max-w-5xl mx-auto px-4 py-12 -mt-8">
+        {featureGroups.map((group, groupIndex) => (
+          <div key={group.title} className="mb-10">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              {group.title}
+            </h2>
+            <div className={`grid gap-4 ${
+              group.features.length === 1 ? 'grid-cols-1 max-w-sm' :
+              group.features.length === 2 ? 'grid-cols-1 md:grid-cols-2' :
+              'grid-cols-1 md:grid-cols-3'
+            }`}>
+              {group.features.map((feature) => {
+                const Icon = feature.icon;
+                return (
+                  <button
+                    key={feature.id}
+                    onClick={() => setActiveFeature(feature.id)}
+                    className="group bg-white rounded-2xl p-5 border border-gray-200 shadow-sm hover:shadow-lg hover:border-gray-300 transition-all text-left relative overflow-hidden"
+                  >
+                    <div className={`absolute top-0 right-0 w-20 h-20 ${feature.color} opacity-10 rounded-bl-full`} />
+                    <div className={`w-12 h-12 ${feature.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                      {feature.name}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {feature.desc}
+                    </p>
+                    <div className="mt-4 flex items-center text-sm font-medium text-gray-900 group-hover:text-amber-500 transition-colors">
+                      <span>进入</span>
+                      <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Footer */}
-      <footer className="text-center py-8 text-gray-400 text-sm border-t border-gray-200 bg-white">
+      <footer className="text-center py-8 text-gray-400 text-sm border-t border-gray-200 bg-white/50">
         <p>Made with ♥ by PetMind.ai</p>
       </footer>
     </main>
