@@ -44,13 +44,24 @@ export default function PetCalendar({ onBack }: PetCalendarProps) {
   });
 
   useEffect(() => {
-    // 获取当前用户
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-      if (user) {
-        fetchReminders(user.id);
+    // 先获取 session，确保认证状态恢复
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user);
+        fetchReminders(session.user.id);
+      }
+      setLoading(false);
+    });
+
+    // 监听认证状态变化
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+      if (session?.user) {
+        fetchReminders(session.user.id);
       }
     });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const fetchReminders = async (userId: string) => {
