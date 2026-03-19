@@ -29,14 +29,15 @@ export async function POST(request: NextRequest) {
       { role: 'user', content: message },
     ];
 
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    // 使用 Minimax API
+    const response = await fetch('https://api.minimax.chat/v1/text/chatcompletion_v2', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.MINIMAX_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: 'abab6.5s-chat',
         messages,
         temperature: 0.7,
         max_tokens: 1000,
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('AI API error:', errorText);
+      console.error('Minimax API error:', errorText);
       throw new Error('AI 服务暂时不可用');
     }
 

@@ -46,14 +46,14 @@ export async function POST(request: NextRequest) {
 
 注意：仅供参考，不能替代专业兽医诊断。请用温和、专业的语气回复。`;
 
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    const response = await fetch('https://api.minimax.chat/v1/text/chatcompletion_v2', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+        'Authorization': `Bearer ${process.env.MINIMAX_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: 'abab6.5s-chat',
         messages: [
           { role: 'system', content: '你是一位专业、有爱心的宠物兽医。' },
           { role: 'user', content: prompt },

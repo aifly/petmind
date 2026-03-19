@@ -66,14 +66,14 @@ ${personality ? `性格特点：${personality}` : ''}
 
 只返回JSON数组，不要其他内容。`;
 
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    const response = await fetch('https://api.minimax.chat/v1/text/chatcompletion_v2', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.MINIMAX_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: 'abab6.5s-chat',
         messages: [
           { role: 'system', content: '你是一位创意取名专家，擅长为宠物取独特有意义的名字。' },
           { role: 'user', content: promptText },
