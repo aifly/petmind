@@ -1,8 +1,9 @@
 'use client';
 
-import { PawPrint, Plus, Calendar, Scale, Heart, Trash2, Edit2, ChevronRight, Syringe } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { PawPrint, Plus, Calendar, Scale, Heart, Trash2, ChevronRight, Syringe } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import toast from 'react-hot-toast';
 
 interface PetProfile {
   id: string;
@@ -93,8 +94,9 @@ export default function PetProfile({ onBack }: PetProfileProps) {
 
       if (error) throw error;
       setPets(data || []);
-    } catch (error) {
-      console.error('Error fetching pets:', error);
+    } catch (error: any) {
+      toast.error('加载宠物列表失败');
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -111,12 +113,19 @@ export default function PetProfile({ onBack }: PetProfileProps) {
       if (error) throw error;
       setVaccines(data || []);
     } catch (error) {
-      console.error('Error fetching vaccines:', error);
+      toast.error('加载疫苗记录失败');
     }
   };
 
   const addPet = async () => {
-    if (!newPet.name.trim() || !user) return;
+    if (!newPet.name.trim()) {
+      toast.error('请输入宠物名字');
+      return;
+    }
+    if (!user) {
+      toast.error('请先登录');
+      return;
+    }
 
     try {
       const { data, error } = await supabase
@@ -138,9 +147,9 @@ export default function PetProfile({ onBack }: PetProfileProps) {
       setPets([data, ...pets]);
       setNewPet({ name: '', type: 'dog', breed: '', gender: 'unknown', birth_date: '', weight: '', notes: '' });
       setShowAddModal(false);
-    } catch (error) {
-      console.error('Error adding pet:', error);
-      alert('添加失败，请重试');
+      toast.success('添加成功！');
+    } catch (error: any) {
+      toast.error(error.message || '添加失败，请重试');
     }
   };
 
@@ -155,14 +164,22 @@ export default function PetProfile({ onBack }: PetProfileProps) {
         setSelectedPet(null);
         setVaccines([]);
       }
-    } catch (error) {
-      console.error('Error deleting pet:', error);
-      alert('删除失败，请重试');
+      toast.success('删除成功');
+    } catch (error: any) {
+      toast.error(error.message || '删除失败，请重试');
     }
   };
 
   const addVaccine = async () => {
-    if (!newVaccine.name.trim() || !newVaccine.date || !selectedPet) return;
+    if (!newVaccine.name.trim()) {
+      toast.error('请输入疫苗名称');
+      return;
+    }
+    if (!newVaccine.date) {
+      toast.error('请选择接种日期');
+      return;
+    }
+    if (!selectedPet) return;
 
     try {
       const { data, error } = await supabase
@@ -182,9 +199,9 @@ export default function PetProfile({ onBack }: PetProfileProps) {
       setVaccines([data, ...vaccines]);
       setNewVaccine({ name: '', date: '', next_date: '', hospital: '', notes: '' });
       setShowVaccineModal(false);
-    } catch (error) {
-      console.error('Error adding vaccine:', error);
-      alert('添加失败，请重试');
+      toast.success('添加成功！');
+    } catch (error: any) {
+      toast.error(error.message || '添加失败，请重试');
     }
   };
 
@@ -193,9 +210,9 @@ export default function PetProfile({ onBack }: PetProfileProps) {
       const { error } = await supabase.from('vaccines').delete().eq('id', id);
       if (error) throw error;
       setVaccines(vaccines.filter(v => v.id !== id));
-    } catch (error) {
-      console.error('Error deleting vaccine:', error);
-      alert('删除失败，请重试');
+      toast.success('删除成功');
+    } catch (error: any) {
+      toast.error(error.message || '删除失败，请重试');
     }
   };
 
@@ -209,7 +226,7 @@ export default function PetProfile({ onBack }: PetProfileProps) {
     if (years > 0) {
       return `${years}岁${months > 0 ? months + '个月' : ''}`;
     }
-    return `${months + 12}个月`;
+    return `${Math.max(0, months + 12 * years)}个月`;
   };
 
   const getPetEmoji = (type: string) => {
