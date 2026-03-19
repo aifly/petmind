@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Brain, ArrowRight, Stethoscope, Calendar, LogOut, User, Heart } from 'lucide-react';
+import { Sparkles, Brain, ArrowRight, Stethoscope, Calendar, LogOut, User, Heart, Utensils } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import PetNameGenerator from './components/PetNameGenerator';
 import PersonalityAnalyzer from './components/PersonalityAnalyzer';
 import HealthConsultation from './components/HealthConsultation';
 import PetCalendar from './components/PetCalendar';
 import PetProfile from './components/PetProfile';
+import FeedingGuide from './components/FeedingGuide';
 import AuthForm from './components/AuthForm';
 
 const features = [
@@ -17,6 +18,12 @@ const features = [
     desc: '管理宠物信息和疫苗记录',
     icon: Heart,
     highlight: true,
+  },
+  {
+    id: 'feeding',
+    name: '喂养建议',
+    desc: 'AI 定制科学喂养方案',
+    icon: Utensils,
   },
   {
     id: 'name',
@@ -83,6 +90,14 @@ export default function Home() {
     return (
       <main className="min-h-screen bg-gray-100 py-8 px-4">
         <PetProfile onBack={() => setActiveFeature(null)} />
+      </main>
+    );
+  }
+
+  if (activeFeature === 'feeding') {
+    return (
+      <main className="min-h-screen bg-gray-100 py-8 px-4">
+        <FeedingGuide onBack={() => setActiveFeature(null)} />
       </main>
     );
   }
