@@ -1,15 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Brain, ArrowRight, Stethoscope, Calendar, LogOut, User } from 'lucide-react';
+import { Sparkles, Brain, ArrowRight, Stethoscope, Calendar, LogOut, User, Heart } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import PetNameGenerator from './components/PetNameGenerator';
 import PersonalityAnalyzer from './components/PersonalityAnalyzer';
 import HealthConsultation from './components/HealthConsultation';
 import PetCalendar from './components/PetCalendar';
+import PetProfile from './components/PetProfile';
 import AuthForm from './components/AuthForm';
 
 const features = [
+  {
+    id: 'profile',
+    name: '宠物档案',
+    desc: '管理宠物信息和疫苗记录',
+    icon: Heart,
+    highlight: true,
+  },
   {
     id: 'name',
     name: '魔法命名',
@@ -42,13 +50,11 @@ export default function Home() {
   const [activeFeature, setActiveFeature] = useState<string | null>(null);
 
   useEffect(() => {
-    // 检查当前用户
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
       setLoading(false);
     });
 
-    // 监听登录状态变化
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
     });
@@ -61,10 +67,6 @@ export default function Home() {
     setUser(null);
   };
 
-  const handleLoginSuccess = () => {
-    // 登录成功后会通过 onAuthStateChange 自动更新
-  };
-
   if (loading) {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -73,12 +75,18 @@ export default function Home() {
     );
   }
 
-  // 如果没有登录，显示登录页面
   if (!user) {
-    return <AuthForm onLoginSuccess={handleLoginSuccess} />;
+    return <AuthForm onLoginSuccess={() => {}} />;
   }
 
-  // 功能页面
+  if (activeFeature === 'profile') {
+    return (
+      <main className="min-h-screen bg-gray-100 py-8 px-4">
+        <PetProfile onBack={() => setActiveFeature(null)} />
+      </main>
+    );
+  }
+
   if (activeFeature === 'name') {
     return (
       <main className="min-h-screen bg-gray-100 py-8 px-4">
@@ -111,10 +119,9 @@ export default function Home() {
     );
   }
 
-  // 首页
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* Header with User */}
+      {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="text-lg font-semibold text-gray-900">
@@ -143,7 +150,7 @@ export default function Home() {
             用 AI 关爱你的毛孩子
           </h1>
           <p className="text-lg text-gray-600 max-w-lg mx-auto">
-            智能命名 · 性格分析 · 健康咨询 · 日历管理
+            智能命名 · 性格分析 · 健康咨询 · 日程管理
           </p>
         </div>
       </div>
@@ -162,20 +169,28 @@ export default function Home() {
               <button
                 key={feature.id}
                 onClick={() => setActiveFeature(feature.id)}
-                className="w-full p-6 rounded-2xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all text-left flex items-center gap-5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
+                className={`w-full p-6 rounded-2xl border shadow-sm hover:shadow-md transition-all text-left flex items-center gap-5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 ${
+                  feature.highlight
+                    ? 'bg-gray-900 border-gray-900'
+                    : 'bg-white border-gray-200'
+                }`}
               >
-                <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center shrink-0">
-                  <Icon className="w-6 h-6 text-white" aria-hidden="true" />
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                  feature.highlight ? 'bg-white' : 'bg-gray-900'
+                }`}>
+                  <Icon className={`w-6 h-6 ${feature.highlight ? 'text-gray-900' : 'text-white'}`} aria-hidden="true" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-0.5">
+                  <h3 className={`text-lg font-semibold mb-0.5 ${
+                    feature.highlight ? 'text-white' : 'text-gray-900'
+                  }`}>
                     {feature.name}
                   </h3>
-                  <p className="text-gray-500 text-sm">
+                  <p className={`text-sm ${feature.highlight ? 'text-gray-300' : 'text-gray-500'}`}>
                     {feature.desc}
                   </p>
                 </div>
-                <ArrowRight className="w-5 h-5 text-gray-400" aria-hidden="true" />
+                <ArrowRight className={`w-5 h-5 ${feature.highlight ? 'text-gray-400' : 'text-gray-400'}`} aria-hidden="true" />
               </button>
             );
           })}
