@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { PawPrint, Plus, Calendar, Scale, Heart, Trash2, ChevronRight, Syringe } from 'lucide-react';
+import { PawPrint, Plus, Calendar, Scale, Heart, Trash2, ChevronRight, Syringe, Edit2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import toast from 'react-hot-toast';
 
@@ -55,10 +55,22 @@ export default function PetProfile({ onBack }: PetProfileProps) {
   const [vaccines, setVaccines] = useState<VaccineRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showVaccineModal, setShowVaccineModal] = useState(false);
   const [user, setUser] = useState<any>(null);
 
   const [newPet, setNewPet] = useState({
+    name: '',
+    type: 'dog',
+    breed: '',
+    gender: 'unknown',
+    birth_date: '',
+    weight: '',
+    notes: '',
+  });
+
+  const [editPet, setEditPet] = useState({
+    id: '',
     name: '',
     type: 'dog',
     breed: '',
@@ -77,7 +89,6 @@ export default function PetProfile({ onBack }: PetProfileProps) {
   });
 
   useEffect(() => {
-    // 先获取 session，确保认证状态恢复
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
@@ -86,7 +97,6 @@ export default function PetProfile({ onBack }: PetProfileProps) {
       setLoading(false);
     });
 
-    // 监听认证状态变化
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
       if (session?.user) {
@@ -109,7 +119,6 @@ export default function PetProfile({ onBack }: PetProfileProps) {
       if (error) throw error;
       setPets(data || []);
     } catch (error: any) {
-      // 无数据时不报错，只在真正的网络/权限错误时提示
       if (error?.code !== 'PGRST116') {
         console.error(error);
       }
@@ -167,6 +176,53 @@ export default function PetProfile({ onBack }: PetProfileProps) {
     } catch (error: any) {
       toast.error(error.message || '添加失败，请重试');
     }
+  };
+
+  const updatePet = async () => {
+    if (!editPet.name.trim()) {
+      toast.error('请输入宠物名字');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('pets')
+        .update({
+          name: editPet.name,
+          type: editPet.type,
+          breed: editPet.breed || null,
+          gender: editPet.gender,
+          birth_date: editPet.birth_date || null,
+          weight: editPet.weight ? parseFloat(editPet.weight) : null,
+          notes: editPet.notes || null,
+        })
+        .eq('id', editPet.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      setPets(pets.map(p => p.id === editPet.id ? data : p));
+      setSelectedPet(data);
+      setShowEditModal(false);
+      toast.success('更新成功！');
+    } catch (error: any) {
+      toast.error(error.message || '更新失败，请重试');
+    }
+  };
+
+  const openEditModal = (pet: PetProfile) => {
+    setEditPet({
+      id: pet.id,
+      name: pet.name,
+      type: pet.type,
+      breed: pet.breed || '',
+      gender: pet.gender || 'unknown',
+      birth_date: pet.birth_date || '',
+      weight: pet.weight?.toString() || '',
+      notes: pet.notes || '',
+    });
+    setShowEditModal(true);
   };
 
   const deletePet = async (id: string) => {
@@ -272,6 +328,13 @@ export default function PetProfile({ onBack }: PetProfileProps) {
                   {selectedPet.name} 的档案
                 </h2>
               </div>
+              <button
+                onClick={() => openEditModal(selectedPet)}
+                className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                aria-label="编辑"
+              >
+                <Edit2 className="w-5 h-5" />
+              </button>
               <button
                 onClick={() => deletePet(selectedPet.id)}
                 className="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-800 rounded-lg transition-colors"
@@ -434,6 +497,123 @@ export default function PetProfile({ onBack }: PetProfileProps) {
                   className="flex-1 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors font-medium"
                 >
                   添加
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Pet Modal */}
+        {showEditModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">编辑宠物信息</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">名字 *</label>
+                  <input
+                    type="text"
+                    value={editPet.name}
+                    onChange={(e) => setEditPet({ ...editPet, name: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-gray-500 focus:ring-2 focus:ring-gray-200 focus:outline-none text-gray-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">类型</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {petTypes.map((type) => (
+                      <button
+                        key={type.id}
+                        onClick={() => setEditPet({ ...editPet, type: type.id })}
+                        className={`p-2 rounded-lg text-center transition-all ${
+                          editPet.type === type.id
+                            ? 'bg-gray-900 text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        <span className="text-xl block">{type.emoji}</span>
+                        <span className="text-xs">{type.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">品种</label>
+                  <input
+                    type="text"
+                    value={editPet.breed}
+                    onChange={(e) => setEditPet({ ...editPet, breed: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-gray-500 focus:ring-2 focus:ring-gray-200 focus:outline-none text-gray-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">性别</label>
+                  <div className="flex gap-2">
+                    {genderOptions.map((g) => (
+                      <button
+                        key={g.id}
+                        onClick={() => setEditPet({ ...editPet, gender: g.id })}
+                        className={`flex-1 py-2 rounded-xl transition-all ${
+                          editPet.gender === g.id
+                            ? 'bg-gray-900 text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        {g.emoji} {g.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">出生日期</label>
+                    <input
+                      type="date"
+                      value={editPet.birth_date}
+                      onChange={(e) => setEditPet({ ...editPet, birth_date: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-gray-500 focus:ring-2 focus:ring-gray-200 focus:outline-none text-gray-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">体重</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={editPet.weight}
+                      onChange={(e) => setEditPet({ ...editPet, weight: e.target.value })}
+                      placeholder="kg"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-gray-500 focus:ring-2 focus:ring-gray-200 focus:outline-none text-gray-900"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">备注</label>
+                  <textarea
+                    value={editPet.notes}
+                    onChange={(e) => setEditPet({ ...editPet, notes: e.target.value })}
+                    rows={2}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-gray-500 focus:ring-2 focus:ring-gray-200 focus:outline-none text-gray-900 resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={updatePet}
+                  className="flex-1 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors font-medium"
+                >
+                  保存
                 </button>
               </div>
             </div>
