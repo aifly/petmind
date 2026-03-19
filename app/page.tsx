@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Brain, ArrowRight, Stethoscope, Calendar, LogOut, User, Heart, Utensils, Camera } from 'lucide-react';
+import { Sparkles, Brain, ArrowRight, Stethoscope, Calendar, LogOut, User, Heart, Utensils, Camera, MessageCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import PetNameGenerator from './components/PetNameGenerator';
 import PersonalityAnalyzer from './components/PersonalityAnalyzer';
@@ -9,6 +9,7 @@ import HealthConsultation from './components/HealthConsultation';
 import PetCalendar from './components/PetCalendar';
 import PetProfile from './components/PetProfile';
 import FeedingGuide from './components/FeedingGuide';
+import AiConsultation from './components/AiConsultation';
 import PhotoAnalysis from './components/PhotoAnalysis';
 import AuthForm from './components/AuthForm';
 
@@ -49,6 +50,12 @@ const features = [
     name: '健康咨询',
     desc: 'AI 提供初步健康建议',
     icon: Stethoscope,
+  },
+  {
+    id: 'consult',
+    name: 'AI 问诊',
+    desc: '多轮对话深度咨询',
+    icon: MessageCircle,
   },
   {
     id: 'calendar',
@@ -137,6 +144,14 @@ export default function Home() {
     return (
       <main className="min-h-screen bg-gray-100 py-8 px-4">
         <HealthConsultation onBack={() => setActiveFeature(null)} />
+      </main>
+    );
+  }
+
+  if (activeFeature === 'consult') {
+    return (
+      <main className="min-h-screen bg-gray-100 py-8 px-4">
+        <AiConsultation onBack={() => setActiveFeature(null)} />
       </main>
     );
   }
