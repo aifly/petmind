@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Brain, ArrowRight, Stethoscope, Calendar, LogOut, User, Heart, Utensils, Camera, MessageCircle, TrendingUp } from 'lucide-react';
+import { Sparkles, Brain, ArrowRight, Stethoscope, Calendar, LogOut, User, Heart, Utensils, Camera, MessageCircle, TrendingUp, ShoppingBag } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import PetNameGenerator from './components/PetNameGenerator';
 import PersonalityAnalyzer from './components/PersonalityAnalyzer';
@@ -11,6 +11,7 @@ import PetProfile from './components/PetProfile';
 import FeedingGuide from './components/FeedingGuide';
 import AiConsultation from './components/AiConsultation';
 import GrowthTracker from './components/GrowthTracker';
+import ProductRecommendation from './components/ProductRecommendation';
 import PhotoAnalysis from './components/PhotoAnalysis';
 import AuthForm from './components/AuthForm';
 
@@ -63,6 +64,12 @@ const features = [
     name: '成长记录',
     desc: '体重身高追踪和AI分析',
     icon: TrendingUp,
+  },
+  {
+    id: 'product',
+    name: '用品推荐',
+    desc: 'AI 推荐合适的产品',
+    icon: ShoppingBag,
   },
   {
     id: 'calendar',
@@ -167,6 +174,14 @@ export default function Home() {
     return (
       <main className="min-h-screen bg-gray-100 py-8 px-4">
         <GrowthTracker onBack={() => setActiveFeature(null)} />
+      </main>
+    );
+  }
+
+  if (activeFeature === 'product') {
+    return (
+      <main className="min-h-screen bg-gray-100 py-8 px-4">
+        <ProductRecommendation onBack={() => setActiveFeature(null)} />
       </main>
     );
   }
