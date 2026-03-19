@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Brain, ArrowRight, Stethoscope, Calendar, LogOut, User, Heart, Utensils, Camera, MessageCircle, TrendingUp, ShoppingBag, PawPrint, Shield, Clipboard } from 'lucide-react';
+import { Sparkles, Brain, ArrowRight, Stethoscope, Calendar, LogOut, User, Heart, Utensils, Camera, MessageCircle, TrendingUp, ShoppingBag, PawPrint, MapPin, Settings, Shield, Clipboard } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import PetNameGenerator from './components/PetNameGenerator';
 import PersonalityAnalyzer from './components/PersonalityAnalyzer';
@@ -12,6 +12,8 @@ import FeedingGuide from './components/FeedingGuide';
 import AiConsultation from './components/AiConsultation';
 import GrowthTracker from './components/GrowthTracker';
 import ProductRecommendation from './components/ProductRecommendation';
+import NearbyHospitals from './components/NearbyHospitals';
+import SettingsPage from './components/SettingsPage';
 import PhotoAnalysis from './components/PhotoAnalysis';
 import AuthForm from './components/AuthForm';
 
@@ -44,6 +46,8 @@ const featureGroups = [
     title: '🛒 其他服务',
     features: [
       { id: 'product', name: '用品推荐', desc: 'AI 推荐合适产品', icon: ShoppingBag, color: 'bg-teal-500' },
+      { id: 'hospital', name: '附近医院', desc: '查找周边宠物医院', icon: MapPin, color: 'bg-red-500' },
+      { id: 'settings', name: '设置', desc: '语言、主题等设置', icon: Settings, color: 'bg-gray-500' },
     ]
   },
 ];
@@ -159,6 +163,22 @@ export default function Home() {
     return (
       <main className="min-h-screen bg-gray-100 py-8 px-4">
         <PetCalendar onBack={() => setActiveFeature(null)} />
+      </main>
+    );
+  }
+
+  if (activeFeature === 'hospital') {
+    return (
+      <main className="min-h-screen bg-gray-100 py-8 px-4">
+        <NearbyHospitals onBack={() => setActiveFeature(null)} />
+      </main>
+    );
+  }
+
+  if (activeFeature === 'settings') {
+    return (
+      <main className="min-h-screen bg-gray-100 py-8 px-4">
+        <SettingsPage onBack={() => setActiveFeature(null)} />
       </main>
     );
   }
