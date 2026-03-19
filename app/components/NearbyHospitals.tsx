@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MapPin, Search, ChevronLeft, Navigation, Phone, Clock, Star, ExternalLink } from 'lucide-react';
+import { MapPin, Search, ChevronLeft, Navigation, Phone, Clock, Star, Globe } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface Hospital {
@@ -20,18 +20,29 @@ interface NearbyHospitalsProps {
   onBack: () => void;
 }
 
+const cities = [
+  { name: '武汉市', lat: 30.5928, lng: 114.3055 },
+  { name: '上海市', lat: 31.2304, lng: 121.4737 },
+  { name: '北京市', lat: 39.9042, lng: 116.4074 },
+  { name: '广州市', lat: 23.1291, lng: 113.2644 },
+  { name: '深圳市', lat: 22.5431, lng: 114.0579 },
+  { name: '杭州市', lat: 30.2741, lng: 120.1551 },
+  { name: '成都市', lat: 30.5728, lng: 104.0668 },
+  { name: '南京市', lat: 32.0603, lng: 118.7969 },
+  { name: '西安市', lat: 34.3416, lng: 108.9398 },
+  { name: '重庆市', lat: 29.4316, lng: 106.9123 },
+];
+
 export default function NearbyHospitals({ onBack }: NearbyHospitalsProps) {
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [location, setLocation] = useState<{ lat: number; lng: number; name: string } | null>(null);
   const [loading, setLoading] = useState(false);
-  const [searchRadius, setSearchRadius] = useState(5); // km
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
   const [keyword, setKeyword] = useState('');
-  const [permissionDenied, setPermissionDenied] = useState(false);
+  const [showCityPicker, setShowCityPicker] = useState(false);
 
   const getLocation = () => {
     setLoading(true);
-    setPermissionDenied(false);
     
     if (!navigator.geolocation) {
       toast.error('您的浏览器不支持定位功能');
@@ -44,46 +55,50 @@ export default function NearbyHospitals({ onBack }: NearbyHospitalsProps) {
         setLocation({
           lat: position.coords.latitude,
           lng: position.coords.longitude,
+          name: '当前位置',
         });
-        // 模拟附近医院数据（实际需要调用地图API）
         setHospitals(generateMockHospitals(position.coords.latitude, position.coords.longitude));
         setLoading(false);
+        toast.success('定位成功');
       },
       (error) => {
         console.error('定位失败:', error);
-        setPermissionDenied(true);
         setLoading(false);
-        // 使用默认位置（上海）
-        const defaultLat = 31.2304;
-        const defaultLng = 121.4737;
-        setLocation({ lat: defaultLat, lng: defaultLng });
-        setHospitals(generateMockHospitals(defaultLat, defaultLng));
-        toast.error('无法获取定位，显示默认地区');
+        // 默认选择武汉
+        selectCity(cities[0]);
+        toast.error('定位失败，已选择武汉市');
       }
     );
   };
 
+  const selectCity = (city: typeof cities[0]) => {
+    setLocation({ lat: city.lat, lng: city.lng, name: city.name });
+    setHospitals(generateMockHospitals(city.lat, city.lng));
+    setShowCityPicker(false);
+  };
+
   const generateMockHospitals = (lat: number, lng: number): Hospital[] => {
+    const prefix = location?.name?.replace('市', '') || '本地';
     const names = [
-      '萌宠宠物医院',
-      '爱康宠物诊所',
-      '汪星人宠物中心',
-      '喵星人宠物医院',
-      '宠物天使诊所',
-      '毛孩子健康中心',
-      '宠颐宠物医院',
-      '芭比堂宠物医院',
+      `${prefix}宠物医院`,
+      `${prefix}爱宠诊所`,
+      `${prefix}萌宠中心`,
+      `${prefix}汪星人医院`,
+      `${prefix}喵星人诊所`,
+      `${prefix}宠物天使`,
+      `${prefix}毛孩子健康中心`,
+      `${prefix}宠颐医院`,
     ];
     
     const addresses = [
-      '上海市浦东新区世纪大道100号',
-      '上海市静安区南京西路1688号',
-      '上海市徐汇区漕溪北路88号',
-      '上海市长宁区中山公园对面',
-      '上海市杨浦区五角场商圈',
-      '上海市虹口区四川北路',
-      '上海市普陀区中山北路',
-      '上海市闸北区共和新路',
+      `${location?.name || '武汉市'}江汉区解放大道123号`,
+      `${location?.name || '武汉市'}武昌区中南路456号`,
+      `${location?.name || '武汉市'}洪山区光谷大道789号`,
+      `${location?.name || '武汉市'}汉阳区龙阳大道101号`,
+      `${location?.name || '武汉市'}青山区和平大道202号`,
+      `${location?.name || '武汉市'}硚口区解放大道301号`,
+      `${location?.name || '武汉市'}东西湖区金山大道88号`,
+      `${location?.name || '武汉市'}新洲区阳逻开发区1号`,
     ];
 
     return names.map((name: string, index: number) => ({
@@ -101,11 +116,7 @@ export default function NearbyHospitals({ onBack }: NearbyHospitalsProps) {
 
   const openNavigation = (hospital: Hospital) => {
     if (hospital.latitude && hospital.longitude) {
-      // 尝试使用高德地图或百度地图
       const gaodeUrl = `https://uri.amap.com/marker?position=${hospital.longitude},${hospital.latitude}&name=${encodeURIComponent(hospital.name)}&coordinate=gaode&callnative=0`;
-      const baiduUrl = `http://api.map.baidu.com/marker?location=${hospital.latitude},${hospital.longitude}&title=${encodeURIComponent(hospital.name)}&content=${encodeURIComponent(hospital.address)}&output=html&src=webapp.baidu.openAPIdemo`;
-      
-      // 优先尝试高德
       window.open(gaodeUrl, '_blank');
     }
   };
@@ -115,7 +126,8 @@ export default function NearbyHospitals({ onBack }: NearbyHospitalsProps) {
     : hospitals;
 
   useEffect(() => {
-    getLocation();
+    // 默认加载武汉
+    selectCity(cities[0]);
   }, []);
 
   return (
@@ -147,22 +159,47 @@ export default function NearbyHospitals({ onBack }: NearbyHospitalsProps) {
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${location ? 'bg-green-500' : 'bg-yellow-500'}`} />
               <span className="text-sm text-gray-600">
-                {location ? '定位成功' : loading ? '定位中...' : '定位失败'}
+                {location ? location.name : '定位中...'}
               </span>
             </div>
-            <button
-              onClick={getLocation}
-              disabled={loading}
-              className="text-sm text-amber-600 hover:text-amber-700 font-medium"
-            >
-              {loading ? '刷新中...' : '重新定位'}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowCityPicker(!showCityPicker)}
+                className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+              >
+                <Globe className="w-4 h-4" />
+                切换城市
+              </button>
+              <button
+                onClick={getLocation}
+                disabled={loading}
+                className="text-sm text-amber-600 hover:text-amber-700 font-medium"
+              >
+                {loading ? '定位中...' : '重新定位'}
+              </button>
+            </div>
           </div>
           
-          {permissionDenied && (
-            <p className="text-xs text-orange-500 mt-2">
-              ⚠️ 定位权限被拒绝，已使用默认位置
-            </p>
+          {/* City Picker */}
+          {showCityPicker && (
+            <div className="mt-3 p-3 bg-gray-50 rounded-xl">
+              <p className="text-xs text-gray-500 mb-2">选择城市：</p>
+              <div className="flex flex-wrap gap-2">
+                {cities.map((city) => (
+                  <button
+                    key={city.name}
+                    onClick={() => selectCity(city)}
+                    className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
+                      location?.name === city.name
+                        ? 'bg-amber-500 text-white'
+                        : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300'
+                    }`}
+                  >
+                    {city.name}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
         </div>
 
@@ -209,7 +246,7 @@ export default function NearbyHospitals({ onBack }: NearbyHospitalsProps) {
                       <p className="text-sm text-gray-500 mb-2">{hospital.address}</p>
                       <div className="flex items-center gap-4 text-xs text-gray-400">
                         <span className="flex items-center gap-1">
-                          <Navigation className="w-3 h-3" />
+                          <MapPin className="w-3 h-3" />
                           {hospital.distance}
                         </span>
                         {hospital.hours && (
