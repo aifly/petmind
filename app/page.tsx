@@ -56,6 +56,8 @@ export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeFeature, setActiveFeature] = useState<string | null>(null);
+  const [showAuth, setShowAuth] = useState(false);
+  const [pendingFeature, setPendingFeature] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -75,6 +77,33 @@ export default function Home() {
     setUser(null);
   };
 
+  const handleFeatureClick = (featureId: string) => {
+    // 定义需要登录才能访问的功能
+    const protectedFeatures = ['profile', 'growth', 'calendar'];
+    
+    if (protectedFeatures.includes(featureId) && !user) {
+      // 需要登录的功能，显示登录框
+      setPendingFeature(featureId);
+      setShowAuth(true);
+    } else {
+      // 不需要登录的功能，直接进入
+      setActiveFeature(featureId);
+    }
+  };
+
+  const handleLoginSuccess = () => {
+    setShowAuth(false);
+    if (pendingFeature) {
+      setActiveFeature(pendingFeature);
+      setPendingFeature(null);
+    }
+  };
+
+  const handleSkipAuth = () => {
+    setShowAuth(false);
+    setPendingFeature(null);
+  };
+
   if (loading) {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -83,8 +112,24 @@ export default function Home() {
     );
   }
 
-  if (!user) {
-    return <AuthForm onLoginSuccess={() => {}} />;
+  // 显示登录表单（当点击需要登录的功能时）
+  if (showAuth) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
+          <div className="max-w-5xl mx-auto px-4 py-3">
+            <button
+              onClick={handleSkipAuth}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            >
+              <ArrowRight className="w-4 h-4 rotate-180" />
+              返回首页
+            </button>
+          </div>
+        </div>
+        <AuthForm onLoginSuccess={handleLoginSuccess} />
+      </div>
+    );
   }
 
   if (activeFeature === 'profile') {
@@ -195,17 +240,29 @@ export default function Home() {
             <span className="text-lg font-bold text-gray-900">PetMind<span className="text-amber-500">.ai</span></span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full">
-              <User className="w-4 h-4" />
-              <span className="max-w-[120px] truncate">{user.email}</span>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-              aria-label="退出登录"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
+            {user ? (
+              <>
+                <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full">
+                  <User className="w-4 h-4" />
+                  <span className="max-w-[120px] truncate">{user.email}</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  aria-label="退出登录"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setShowAuth(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                <User className="w-4 h-4" />
+                登录 / 注册
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -243,7 +300,7 @@ export default function Home() {
                 return (
                   <button
                     key={feature.id}
-                    onClick={() => setActiveFeature(feature.id)}
+                    onClick={() => handleFeatureClick(feature.id)}
                     className="group bg-white rounded-2xl p-5 border border-gray-200 shadow-sm hover:shadow-lg hover:border-gray-300 transition-all text-left relative overflow-hidden"
                   >
                     <div className={`absolute top-0 right-0 w-20 h-20 ${feature.color} opacity-10 rounded-bl-full`} />
