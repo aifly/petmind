@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { PawPrint, User, LogOut } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -27,9 +28,9 @@ export default function Header() {
   return (
     <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
       <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-        <button
-          onClick={() => router.push('/')}
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+        <Link
+          href="/"
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity no-underline"
         >
           <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center">
             <PawPrint className="w-5 h-5 text-white" />
@@ -37,7 +38,7 @@ export default function Header() {
           <span className="text-lg font-bold text-gray-900">
             PetMind<span className="text-amber-500">.ai</span>
           </span>
-        </button>
+        </Link>
 
         <div className="flex items-center gap-3">
           {user ? (
@@ -55,13 +56,13 @@ export default function Header() {
               </button>
             </>
           ) : (
-            <button
-              onClick={() => router.push('/login')}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+            <Link
+              href="/login"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors no-underline"
             >
               <User className="w-4 h-4" />
               登录 / 注册
-            </button>
+            </Link>
           )}
         </div>
       </div>

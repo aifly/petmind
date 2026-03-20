@@ -1,7 +1,7 @@
 'use client';
 
 import { Sparkles, Brain, ArrowRight, Stethoscope, Calendar, Utensils, Camera, MessageCircle, TrendingUp, ShoppingBag, PawPrint, MapPin, Settings } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Header from './components/Header';
 
 const featureGroups = [
@@ -39,9 +39,41 @@ const featureGroups = [
   },
 ];
 
-export default function Home() {
-  const router = useRouter();
+interface FeatureCardProps {
+  feature: {
+    id: string;
+    name: string;
+    desc: string;
+    protected: boolean;
+    color: string;
+  };
+  Icon: React.ComponentType<{ className?: string }>;
+}
 
+function FeatureCard({ feature, Icon }: FeatureCardProps) {
+  return (
+    <Link
+      href={`/${feature.id}`}
+      className="group bg-white rounded-2xl p-5 border border-gray-200 shadow-sm hover:shadow-lg hover:border-gray-300 transition-all text-left relative overflow-hidden no-underline"
+    >
+      <div className={`absolute top-0 right-0 w-20 h-20 ${feature.color} opacity-10 rounded-bl-full`} />
+      <div className={`w-12 h-12 ${feature.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+        <Icon className="w-6 h-6 text-white" />
+      </div>
+      <h3 className="text-lg font-semibold text-gray-900 mb-1">{feature.name}</h3>
+      <p className="text-sm text-gray-500">{feature.desc}</p>
+      {feature.protected && (
+        <span className="inline-block mt-2 text-xs text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full">需要登录</span>
+      )}
+      <div className="mt-4 flex items-center text-sm font-medium text-gray-900 group-hover:text-amber-500 transition-colors">
+        <span>进入</span>
+        <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+      </div>
+    </Link>
+  );
+}
+
+export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <Header />
@@ -74,27 +106,7 @@ export default function Home() {
             }`}>
               {group.features.map((feature) => {
                 const Icon = feature.icon;
-                return (
-                  <button
-                    key={feature.id}
-                    onClick={() => router.push(`/${feature.id}`)}
-                    className="group bg-white rounded-2xl p-5 border border-gray-200 shadow-sm hover:shadow-lg hover:border-gray-300 transition-all text-left relative overflow-hidden"
-                  >
-                    <div className={`absolute top-0 right-0 w-20 h-20 ${feature.color} opacity-10 rounded-bl-full`} />
-                    <div className={`w-12 h-12 ${feature.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                      <Icon className="w-6 h-6 text-white" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{feature.name}</h3>
-                    <p className="text-sm text-gray-500">{feature.desc}</p>
-                    {feature.protected && (
-                      <span className="inline-block mt-2 text-xs text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full">需要登录</span>
-                    )}
-                    <div className="mt-4 flex items-center text-sm font-medium text-gray-900 group-hover:text-amber-500 transition-colors">
-                      <span>进入</span>
-                      <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </button>
-                );
+                return <FeatureCard key={feature.id} feature={feature} Icon={Icon} />;
               })}
             </div>
           </div>
