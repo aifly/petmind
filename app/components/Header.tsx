@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { PawPrint, User, LogOut } from 'lucide-react';
+import { User, LogOut } from 'lucide-react';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 
 export default function Header() {
@@ -32,11 +33,9 @@ export default function Header() {
           href="/"
           className="flex items-center gap-2 hover:opacity-80 transition-opacity no-underline"
         >
-          <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center">
-            <PawPrint className="w-5 h-5 text-white" />
-          </div>
+          <Image src="/logo.svg" alt="PetMind" width={36} height={36} className="rounded-xl" />
           <span className="text-lg font-bold text-gray-900">
-            PetMind<span className="text-amber-500">.ai</span>
+            PetMind<span className="text-orange-500">.ai</span>
           </span>
         </Link>
 

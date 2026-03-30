@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF9A76"/>
+      <stop offset="100%" style="stop-color:#FF5733"/>
+    </linearGradient>
+  </defs>
+  <!-- 背景圆角矩形 -->
+  <rect width="64" height="64" rx="14" fill="url(#g)"/>
+  <!-- 爪印 -->
+  <g fill="white">
+    <!-- 掌心 -->
+    <ellipse cx="32" cy="40" rx="13" ry="11"/>
+    <!-- 左上爪趾 -->
+    <ellipse cx="18" cy="26" rx="5.5" ry="6.5" transform="rotate(-15,18,26)"/>
+    <!-- 左中爪趾 -->
+    <ellipse cx="26" cy="19" rx="5" ry="6" transform="rotate(-5,26,19)"/>
+    <!-- 右中爪趾 -->
+    <ellipse cx="38" cy="19" rx="5" ry="6" transform="rotate(5,38,19)"/>
+    <!-- 右上爪趾 -->
+    <ellipse cx="46" cy="26" rx="5.5" ry="6.5" transform="rotate(15,46,26)"/>
+  </g>
+  <!-- 爱心（珊瑚橙色，嵌在掌心中） -->
+  <path d="M32,41 C31.2,34 28,34 28,37 C28,39.5 32,44 32,44 C32,44 36,39.5 36,37 C36,34 32.8,34 32,41 Z" fill="#FF7B54"/>
+</svg>

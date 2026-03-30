@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" width="520" height="120">
+  <defs>
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF9A76;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF5733;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF7B54;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF5733;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#FF7B54" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- 图标背景圆 -->
+  <circle cx="60" cy="60" r="50" fill="#FFF5F2" />
+
+  <!-- 爪印图标（缩小版） -->
+  <g transform="translate(60, 62)" filter="url(#glow)">
+    <!-- 掌心 -->
+    <ellipse cx="0" cy="10" rx="22" ry="18" fill="url(#iconGrad)" />
+    <!-- 四个爪趾 -->
+    <ellipse cx="-17" cy="-8" rx="8" ry="10" transform="rotate(-15,-17,-8)" fill="url(#iconGrad)" />
+    <ellipse cx="-7" cy="-18" rx="7" ry="9" transform="rotate(-5,-7,-18)" fill="url(#iconGrad)" />
+    <ellipse cx="7" cy="-18" rx="7" ry="9" transform="rotate(5,7,-18)" fill="url(#iconGrad)" />
+    <ellipse cx="17" cy="-8" rx="8" ry="10" transform="rotate(15,17,-8)" fill="url(#iconGrad)" />
+    <!-- 爱心 -->
+    <path d="M0,6 C-1.2,-7.5 -5.5,-7.5 -5.5,-3 C-5.5,0 0,7 0,7 C0,7 5.5,0 5.5,-3 C5.5,-7.5 1.2,-7.5 0,6 Z" fill="white" opacity="0.9" transform="translate(0,2)" />
+    <path d="M0,4 C-1,-6 -5,-6 -5,-2 C-5,1 0,8 0,8 C0,8 5,1 5,-2 C5,-6 1,-6 0,4 Z" fill="white" opacity="0.9" />
+  </g>
+
+  <!-- 文字区域 -->
+  <!-- PetMind 主标题 -->
+  <text x="130" y="68" font-family="'Helvetica Neue', Arial, sans-serif" font-size="44" font-weight="800" fill="url(#textGrad)" letter-spacing="-1">PetMind</text>
+
+  <!-- 分隔线 -->
+  <line x1="130" y1="78" x2="380" y2="78" stroke="#FFD4C4" stroke-width="1.5" />
+
+  <!-- 副标题 -->
+  <text x="132" y="96" font-family="'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#FF9A76" letter-spacing="4">智能宠物管理平台</text>
+</svg>

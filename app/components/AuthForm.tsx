@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { User, Mail, Lock, Loader2, ArrowLeft } from 'lucide-react';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 
 interface AuthFormProps {
@@ -52,8 +53,11 @@ export default function AuthForm({ onLoginSuccess }: AuthFormProps) {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
+          <div className="flex justify-center mb-3">
+            <Image src="/logo.svg" alt="PetMind" width={72} height={72} className="rounded-2xl" />
+          </div>
           <h1 className="text-3xl font-bold text-gray-900">
-            PetMind<span className="text-gray-400">.ai</span>
+            PetMind<span className="text-orange-400">.ai</span>
           </h1>
           <p className="text-gray-500 mt-2">用人工智能关爱每一个毛孩子</p>
         </div>
